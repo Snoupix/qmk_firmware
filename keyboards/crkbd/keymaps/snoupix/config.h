@@ -30,18 +30,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 //#define QUICK_TAP_TERM 0
 //#define TAPPING_TERM 100
+#define TAPPING_TERM 175
+#define TAPPING_TERM_PER_KEY
 
 #ifdef RGBLIGHT_ENABLE
     #define RGBLIGHT_EFFECT_BREATHING
-    #define RGBLIGHT_EFFECT_RAINBOW_MOOD
+    // #define RGBLIGHT_EFFECT_RAINBOW_MOOD
     #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
-    #define RGBLIGHT_EFFECT_SNAKE
-    #define RGBLIGHT_EFFECT_KNIGHT
-    #define RGBLIGHT_EFFECT_CHRISTMAS
-    #define RGBLIGHT_EFFECT_STATIC_GRADIENT
-    #define RGBLIGHT_EFFECT_RGB_TEST
-    #define RGBLIGHT_EFFECT_ALTERNATING
-    #define RGBLIGHT_EFFECT_TWINKLE
+    // #define RGBLIGHT_EFFECT_SNAKE
+    // #define RGBLIGHT_EFFECT_KNIGHT
+    // #define RGBLIGHT_EFFECT_CHRISTMAS
+    // #define RGBLIGHT_EFFECT_STATIC_GRADIENT
+    // #define RGBLIGHT_EFFECT_RGB_TEST
+    // #define RGBLIGHT_EFFECT_ALTERNATING
+    // #define RGBLIGHT_EFFECT_TWINKLE
     #define RGBLIGHT_LIMIT_VAL 120
     #define RGBLIGHT_HUE_STEP 10
     #define RGBLIGHT_SAT_STEP 17
@@ -70,7 +72,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_ALPHAS_MODS
 // #    define ENABLE_RGB_MATRIX_GRADIENT_UP_DOWN
 // #    define ENABLE_RGB_MATRIX_GRADIENT_LEFT_RIGHT
-#    define ENABLE_RGB_MATRIX_BREATHING
+// #    define ENABLE_RGB_MATRIX_BREATHING
 // #    define ENABLE_RGB_MATRIX_BAND_SAT
 // #    define ENABLE_RGB_MATRIX_BAND_VAL
 // #    define ENABLE_RGB_MATRIX_BAND_PINWHEEL_SAT
@@ -114,8 +116,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
 #endif
 
-/* #define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c" */
-#define OLED_FONT_H "oled_font.c"
-#define SPLIT_MODS_ENABLE
-#define SPLIT_LED_STATE_ENABLE
-#define SPLIT_LAYER_STATE_ENABLE
+#ifdef OLED_ENABLE
+//#    define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
+#    define OLED_FONT_H "oled_font.c"
+#    define SPLIT_MODS_ENABLE
+#    define SPLIT_LED_STATE_ENABLE
+#    define SPLIT_LAYER_STATE_ENABLE
+#endif
