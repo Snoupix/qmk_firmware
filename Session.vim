@@ -13,19 +13,18 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +19 keyboards/crkbd/keymaps/snoupix/keymap.c
+badd +167 keyboards/crkbd/keymaps/snoupix/keymap.c
 badd +10 keyboards/crkbd/keymaps/snoupix/rules.mk
 badd +205 keyboards/crkbd/keymaps/snoupix/oled_bongocat.c
 badd +1 keyboards/crkbd/keymaps/snoupix/oled_luna.c
 badd +1 keyboards/crkbd/keymaps/snoupix/oled_font.c
 badd +9 keyboards/crkbd/keymaps/snoupix/oled_icons.c
 badd +33 keyboards/crkbd/keymaps/snoupix/config.h
-badd +258 quantum/quantum.h
 argglobal
 %argdel
 edit keyboards/crkbd/keymaps/snoupix/keymap.c
 argglobal
-balt quantum/quantum.h
+balt keyboards/crkbd/keymaps/snoupix/rules.mk
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -36,12 +35,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 159 - ((27 * winheight(0) + 28) / 56)
+let s:l = 167 - ((27 * winheight(0) + 28) / 56)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 159
-normal! 010|
+keepjumps 167
+normal! 037|
 lcd ~/work/qmk
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'

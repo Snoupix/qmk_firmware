@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define TAPPING_TERM 100
 #define TAPPING_TERM 175
 #define TAPPING_TERM_PER_KEY
+#define UNICODE_SELECTED_MODES UNICODE_MODE_LINUX
 
 #ifdef RGBLIGHT_ENABLE
     #define RGBLIGHT_EFFECT_BREATHING
