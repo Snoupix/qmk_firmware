@@ -51,7 +51,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _UP TD(TD_5)
 #define _RIGHT TD(TD_6)
 
-#define _CAPS QK_GESC
+#define _CAPS KC_ESC
 #define _ESC KC_CAPS
 #define _A TD(TD_A)
 #define _Z TD(TD_Z)
@@ -173,7 +173,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_S] = ACTION_TAP_DANCE_DOUBLE(KC_S, KC_LCTL),
     [TD_D] = ACTION_TAP_DANCE_DOUBLE(KC_D, KC_LSFT),
     [TD_F] = ACTION_TAP_DANCE_DOUBLE(KC_F, KC_LALT),
-    [TD_G] = ACTION_TAP_DANCE_DOUBLE(KC_G, SUPER),
+    [TD_G] = ACTION_TAP_DANCE_DOUBLE(KC_G, SUPER,
 
     [TD_H] = ACTION_TAP_DANCE_DOUBLE(KC_H, SUPER),
     [TD_J] = ACTION_TAP_DANCE_DOUBLE(KC_J, KC_RALT),
