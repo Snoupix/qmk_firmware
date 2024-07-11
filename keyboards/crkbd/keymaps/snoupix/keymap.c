@@ -37,9 +37,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Home row mods layer 2 left side
 #define _GT LCTL_T(KC_GT)
-#define _LP LSFT_T(KC_LPRN)
-#define _RP LALT_T(KC_RPRN)
-#define _GR LGUI_T(KC_GRV)
+#define _GR LSFT_T(KC_GRV)
+#define _LP LALT_T(KC_LPRN)
+#define _RP LGUI_T(KC_RPRN)
 
 // Special tap dance
 #define _AND TD(TD_AND)
@@ -214,7 +214,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
        KC_TAB,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      KC_PEQL,    KC_7,    KC_8,    KC_9, KC_PSLS,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_TRNS,   KC_LT,     _GT,     _LP,     _RP,     _GR,                        _LEFT,   _DOWN,     _UP,  _RIGHT, KC_PPLS, KC_PAST,
+      KC_TRNS,   KC_LT,     _GT,     _GR,     _LP,     _RP,                        _LEFT,   _DOWN,     _UP,  _RIGHT, KC_PPLS, KC_PAST,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, KC_QUOT,                         KC_0,    KC_1,    KC_2,    KC_3, KC_PDOT, KC_PENT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|

@@ -2,8 +2,8 @@
 
 # RGB stuff
 # https://github.com/qmk/qmk_firmware/tree/master/keyboards/crkbd#rgb-matrix
-RGBLIGHT_ENABLE = no
-RGB_MATRIX_ENABLE = yes
+RGBLIGHT_ENABLE = yes
+RGB_MATRIX_ENABLE = no
 # RGB_MATRIX_SPLIT_RIGHT=yes
 
 # Extra features / APIs
