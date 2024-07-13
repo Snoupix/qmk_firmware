@@ -31,10 +31,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //#define QUICK_TAP_TERM 0
 //#define TAPPING_TERM 100
 #define NO_MUSIC_MODE
-#define LAYER_STATE_8BIT
 #define TAPPING_TERM 175
 #define TAPPING_TERM_PER_KEY
 #define UNICODE_SELECTED_MODES UNICODE_MODE_LINUX
+#define LAYER_STATE_8BIT
+// #define DYNAMIC_KEYMAP_LAYER_COUNT 6
 
 #ifdef RGBLIGHT_ENABLE
     #define RGBLIGHT_EFFECT_BREATHING
@@ -54,6 +55,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 // https://github.com/qmk/qmk_firmware/tree/master/keyboards/crkbd#rgb-matrix
+// https://docs.qmk.fm/features/rgb_matrix#rgb-matrix-effects
 #ifdef RGB_MATRIX_ENABLE
 // #   define RGB_MATRIX_KEYPRESSES // reacts to keypresses
 // #   define RGB_MATRIX_KEYRELEASES // reacts to keyreleases (instead of keypresses)
@@ -73,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // RGB Matrix Animation modes. Explicitly enabled
 // For full list of effects, see:
 // https://docs.qmk.fm/#/feature_rgb_matrix?id=rgb-matrix-effects
-// #    define ENABLE_RGB_MATRIX_ALPHAS_MODS
+#    define ENABLE_RGB_MATRIX_ALPHAS_MODS
 // #    define ENABLE_RGB_MATRIX_GRADIENT_UP_DOWN
 // #    define ENABLE_RGB_MATRIX_GRADIENT_LEFT_RIGHT
 // #    define ENABLE_RGB_MATRIX_BREATHING
@@ -85,8 +87,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_BAND_SPIRAL_VAL
 // #    define ENABLE_RGB_MATRIX_CYCLE_ALL
 // #    define ENABLE_RGB_MATRIX_CYCLE_LEFT_RIGHT
-// #    define ENABLE_RGB_MATRIX_CYCLE_UP_DOWN
-#    define ENABLE_RGB_MATRIX_RAINBOW_MOVING_CHEVRON
+#    define ENABLE_RGB_MATRIX_CYCLE_UP_DOWN
+// #    define ENABLE_RGB_MATRIX_RAINBOW_MOVING_CHEVRON
 // #    define ENABLE_RGB_MATRIX_CYCLE_OUT_IN
 // #    define ENABLE_RGB_MATRIX_CYCLE_OUT_IN_DUAL
 // #    define ENABLE_RGB_MATRIX_CYCLE_PINWHEEL
@@ -94,9 +96,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_DUAL_BEACON
 // #    define ENABLE_RGB_MATRIX_RAINBOW_BEACON
 // #    define ENABLE_RGB_MATRIX_RAINBOW_PINWHEELS
-#    define ENABLE_RGB_MATRIX_RAINDROPS
-// #    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
-#    define ENABLE_RGB_MATRIX_HUE_BREATHING
+#    define ENABLE_RGB_MATRIX_FLOWER_BLOOMING
+// #    define ENABLE_RGB_MATRIX_RAINDROPS
+#    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
+// #    define ENABLE_RGB_MATRIX_HUE_BREATHING
 // #    define ENABLE_RGB_MATRIX_HUE_PENDULUM
 // #    define ENABLE_RGB_MATRIX_HUE_WAVE
 // #    define ENABLE_RGB_MATRIX_PIXEL_RAIN
@@ -118,12 +121,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_MULTISPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_SPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
+#    define ENABLE_RGB_MATRIX_STARLIGHT
 #endif
 
 #ifdef OLED_ENABLE
 //#    define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
+#    undef OLED_FONT_H
 #    define OLED_FONT_H "oled_font.c"
 #    define SPLIT_MODS_ENABLE
 #    define SPLIT_LED_STATE_ENABLE
 #    define SPLIT_LAYER_STATE_ENABLE
+#    define SPLIT_WPM_ENABLE // Enable WPM across split keyboards (+268).
 #endif

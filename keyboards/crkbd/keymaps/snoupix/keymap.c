@@ -238,9 +238,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       RGB_TOG,   KC_NO,   KC_NO,   KC_NO,   KC_NO, BL_TOGG,                      BL_STEP,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI,   BL_UP,   BL_ON,                      BL_BRTG, RGB_M_B, RGB_M_K, RGB_M_P, RGB_M_X,   KC_NO,
+      RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI,   BL_ON,                      BL_BRTG, RGB_M_B, RGB_M_K, RGB_M_P, RGB_M_X,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-     RGB_RMOD, RGB_HUD, RGB_SAD, RGB_VAD, BL_DOWN,  BL_OFF,                      RGB_M_R,RGB_M_SW, RGB_M_G,RGB_M_SN, RGB_M_T,   KC_NO,
+     RGB_RMOD, RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD,  BL_OFF,                      RGB_M_R,RGB_M_SW, RGB_M_G,RGB_M_SN, RGB_M_T,   KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             TO(0), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
@@ -263,21 +263,6 @@ void matrix_scan_user(void) {
     }
 }
 
-/*
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    switch (keycode) {
-    case KC_A:
-        if (record->event.pressed) {
-            oled_status = true;
-        } else {
-            oled_status = false;
-        }
-        break;
-    }
-    return true;
-}
-*/
-
 #ifdef OLED_ENABLE
 
 #include "oled_luna.c"
@@ -292,12 +277,55 @@ oled_rotation_t oled_init_user(oled_rotation_t const rotation) {
 }
 
 bool oled_task_user(void) {
+    current_wpm = get_current_wpm();
+    led_usb_state = host_keyboard_led_state();
+
     if (is_keyboard_master()) {
         render_bongocat();
     } else {
+        #ifdef OLD_LUNA
         render_luna_status();
+        #else
+        print_status_narrow();
+        #endif
     }
     return false;
 }
 
+void process_record_user_oled(uint16_t *keycode, keyrecord_t *record) {
+    switch (*keycode) {
+    case KC_LCTL:
+        isSneaking = record->event.pressed;
+        break;
+    case KC_SPC:
+        isJumping = record->event.pressed;
+        if (isJumping) {
+            showedJump = false;
+        }
+        break;
+    case KC_CAPS:
+        isBarking = record->event.pressed;
+        break;
+    }
+}
+
 #endif
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+    /* case KC_A:
+        if (record->event.pressed) {
+            oled_status = true;
+        } else {
+            oled_status = false;
+        }
+        break; */
+    default:
+        #ifdef OLED_ENABLE
+        process_record_user_oled(&keycode, record);
+        #endif
+        break;
+    }
+
+    return true;
+}

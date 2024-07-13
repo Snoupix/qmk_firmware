@@ -2,8 +2,8 @@
 
 # RGB stuff
 # https://github.com/qmk/qmk_firmware/tree/master/keyboards/crkbd#rgb-matrix
-RGBLIGHT_ENABLE = yes
-RGB_MATRIX_ENABLE = no
+RGBLIGHT_ENABLE = no
+RGB_MATRIX_ENABLE = yes
 # RGB_MATRIX_SPLIT_RIGHT=yes
 
 # Extra features / APIs
@@ -22,6 +22,7 @@ UNICODEMAP_ENABLE = no
 WPM_ENABLE = yes
 OLED_ENABLE = yes
 SRC += oled_icons.c
+OLD_LUNA = no
 
 # Needed / Opti
 LTO_ENABLE = yes
