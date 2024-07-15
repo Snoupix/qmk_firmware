@@ -23,6 +23,7 @@
      'render_mod_status()' with your own function.
 */
 
+#include "rgb_matrix.h"
 #include QMK_KEYBOARD_H
 
 #ifdef OLD_LUNA
@@ -419,40 +420,52 @@ static void render_luna(int LUNA_X, int LUNA_Y) {
 } */
 
 layer_state_t layer_state_set_user(layer_state_t state) {
+    // TODO: Keep eeprom's brightness state on new modes
     switch (get_highest_layer(state)) {
     case _DEFAULT:
-        rgblight_reload_from_eeprom();
+        rgb_matrix_reload_from_eeprom();
         break;
     case _NUMS:
-        rgblight_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgblight_sethsv_noeeprom(HSV_TEAL);
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
+        rgb_matrix_sethsv_noeeprom(HSV_TEAL);
         break;
     case _SYMBOLS:
-        rgblight_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgblight_sethsv_noeeprom(HSV_PURPLE);
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
+        rgb_matrix_sethsv_noeeprom(HSV_PURPLE);
         break;
     case _EXTRA:
-        rgblight_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgblight_sethsv_noeeprom(HSV_YELLOW);
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
+        rgb_matrix_sethsv_noeeprom(HSV_YELLOW);
         break;
     }
   return state;
 }
 
 static void print_status_narrow(void) {
-    if (current_wpm > 0) {
+    if (current_wpm == 0) {
+        oled_set_cursor(0, 0);
+        // oled_write("                                                                                                                        ", false);
+        oled_write("                                  ", false);
+
+        /* oled_set_cursor(0, 0); */
+        /* static char const corne_logo[] PROGMEM = { */
+        /*     0x80, 0x81, 0x82, 0x83, 0x84, */
+        /*     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, */
+        /*     0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0}; */
+        /*  */
+        /* oled_write_P(corne_logo, false); */
+
+        if (timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
+            oled_off();
+            return;
+        }
+    } else {
+        /* oled_set_cursor(0, 0); */
         anim_sleep = timer_read32();
-        // wpm counter
         oled_write(get_u8_str(get_current_wpm(), '0'), false);
 
         oled_set_cursor(0, 1);
         oled_write(" wpm", false);
-    } else if(timer_elapsed32(anim_sleep) > OLED_TIMEOUT) { // this fixes the screen on and off bug
-        // clear
-        oled_set_cursor(0,0);
-        oled_write("                                                                                                                        ", false);
-        oled_off();
-        return;
     }
 
     oled_set_cursor(0, 7);
