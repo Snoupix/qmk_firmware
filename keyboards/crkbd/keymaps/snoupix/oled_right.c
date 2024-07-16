@@ -23,6 +23,7 @@
      'render_mod_status()' with your own function.
 */
 
+#include "color.h"
 #include "rgb_matrix.h"
 #include QMK_KEYBOARD_H
 
@@ -427,15 +428,22 @@ layer_state_t layer_state_set_user(layer_state_t state) {
         break;
     case _NUMS:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_TEAL);
+        rgb_matrix_sethsv_noeeprom(HSV_PURPLE);
         break;
     case _SYMBOLS:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_PURPLE);
+        rgb_matrix_sethsv_noeeprom(HSV_YELLOW);
         break;
     case _EXTRA:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_YELLOW);
+        rgb_matrix_sethsv_noeeprom(HSV_SPRINGGREEN);
+        break;
+    case _GAMING:
+        rgb_matrix_reload_from_eeprom();
+        break;
+    case _GAMING2:
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
+        rgb_matrix_sethsv_noeeprom(HSV_CHARTREUSE);
         break;
     }
   return state;
@@ -447,20 +455,20 @@ static void print_status_narrow(void) {
         // oled_write("                                                                                                                        ", false);
         oled_write("                                  ", false);
 
-        /* oled_set_cursor(0, 0); */
-        /* static char const corne_logo[] PROGMEM = { */
-        /*     0x80, 0x81, 0x82, 0x83, 0x84, */
-        /*     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, */
-        /*     0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0}; */
-        /*  */
-        /* oled_write_P(corne_logo, false); */
+        // oled_set_cursor(0, 0);
+        // static char const corne_logo[] PROGMEM = {
+            // 0x80, 0x81, 0x82, 0x83, 0x84,
+            // 0xa0, 0xa1, 0xa2, 0xa3, 0xa4,
+            // 0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0};
 
-        if (timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
-            oled_off();
-            return;
-        }
+        // oled_write_P(corne_logo, false);
+
+        // if (timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
+            // oled_off();
+            // return;
+        // }
     } else {
-        /* oled_set_cursor(0, 0); */
+        // oled_set_cursor(0, 0);
         anim_sleep = timer_read32();
         oled_write(get_u8_str(get_current_wpm(), '0'), false);
 
@@ -470,27 +478,31 @@ static void print_status_narrow(void) {
 
     oled_set_cursor(0, 7);
 
-    switch (get_highest_layer(layer_state)) {
-        case _DEFAULT:
-            oled_write("Qwer ", false);
-            break;
-        case _NUMS:
-            oled_write("Nbrs ", false);
-            break;
-        case _SYMBOLS:
-            oled_write("Symb ", false);
-            break;
-        case _EXTRA:
-            oled_write("Extra", false);
-            break;
-        case 4:
-            oled_write("Raise", false);
-            break;
-        case 5:
-            oled_write("Adj  ", false);
-            break;
-        default:
-            oled_write("Undef", false);
+    if (is_alt_tab_active) {
+        oled_write("AltTab", false);
+    } else {
+        switch (get_highest_layer(layer_state)) {
+            case _DEFAULT:
+                oled_write("Qwer ", false);
+                break;
+            case _NUMS:
+                oled_write("Nbrs ", false);
+                break;
+            case _SYMBOLS:
+                oled_write("Symb ", false);
+                break;
+            case _EXTRA:
+                oled_write("Extra", false);
+                break;
+            case _GAMING:
+                oled_write("Azer ", false);
+                break;
+            case _GAMING2:
+                oled_write("Fn   ", false);
+                break;
+            default:
+                oled_write("Undef", false);
+        }
     }
 
     render_luna(0, 13);

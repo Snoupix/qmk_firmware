@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "action_layer.h"
 #include "keycodes.h"
 #include "keymap_french.h"
 #include "quantum.h"
@@ -51,18 +52,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _UP TD(TD_5)
 #define _RIGHT TD(TD_6)
 
-#define _CAPS KC_ESC
-#define _ESC KC_CAPS
 #define _A TD(TD_A)
 #define _Z TD(TD_Z)
 #define _E TD(TD_E)
 #define _C TD(TD_C)
+
+#define _CAPS TD(TD_CAPS)
+#define _ESC TD(TD_ESC)
+#define _LYR TD(TD_LYR)
 
 enum layers {
     _DEFAULT,
     _NUMS,
     _SYMBOLS,
     _EXTRA,
+    _GAMING,
+    _GAMING2,
 };
 
 enum tap_dance {
@@ -92,28 +97,35 @@ enum tap_dance {
     TD_E,
     TD_Q,
     TD_C,
+
+    TD_ESC,
+    TD_CAPS,
+    TD_LYR,
 };
 
-bool is_ctrl_gui_active = false;
-uint16_t ctrl_gui_timer = 0;
+bool is_esc_caps_swapped = false;
+bool is_alt_tab_active = false;
+uint16_t alt_tab_timer = 0;
 
 void q_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1: // One shot press
-            tap_code(KC_Q);
+            if (is_alt_tab_active) {
+                alt_tab_timer = timer_read();
+            }
+
+            tap_code16(is_alt_tab_active ? KC_TAB : KC_Q);
             break;
         case 2: // Double tap dance triggered
-            if (is_ctrl_gui_active) {
-                unregister_code(SUPER);
-                unregister_code(KC_LCTL);
-                is_ctrl_gui_active = false;
+            if (is_alt_tab_active) {
+                unregister_code(KC_LALT);
+                is_alt_tab_active = false;
                 return;
             }
 
-            register_code(SUPER);
-            register_code(KC_LCTL);
-            is_ctrl_gui_active = true;
-            ctrl_gui_timer = timer_read();
+            register_code(KC_LALT);
+            is_alt_tab_active = true;
+            alt_tab_timer = timer_read();
             break;
     }
 }
@@ -121,7 +133,14 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
 void a_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1:
-            tap_code(KC_A);
+            switch (get_highest_layer(layer_state)) {
+                case _DEFAULT:
+                    tap_code16(KC_A);
+                    break;
+                case _GAMING:
+                    tap_code16(KC_Q);
+                    break;
+            }
             break;
         case 2:
             tap_code16(FR_AGRV);
@@ -132,7 +151,7 @@ void a_key_fn(tap_dance_state_t *state, void *user_data) {
 void z_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1:
-            tap_code(KC_Z);
+            tap_code16(KC_Z);
             break;
         case 2:
             tap_code16(FR_EURO);
@@ -143,7 +162,7 @@ void z_key_fn(tap_dance_state_t *state, void *user_data) {
 void c_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1:
-            tap_code(KC_C);
+            tap_code16(KC_C);
             break;
         case 2:
             tap_code16(FR_CCED);
@@ -164,6 +183,36 @@ void e_key_fn(tap_dance_state_t *state, void *user_data) {
             break;
         case 4:
             tap_code16(FR_CIRC);
+            break;
+    }
+}
+
+void esc_key_fn(tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 1:
+            tap_code16(is_esc_caps_swapped ? KC_CAPS : KC_ESC);
+            break;
+        case 2:
+            is_esc_caps_swapped = !is_esc_caps_swapped;
+            break;
+    }
+}
+
+void caps_key_fn(tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 1:
+            tap_code16(is_esc_caps_swapped ? KC_ESC : KC_CAPS);
+            break;
+        case 2:
+            is_esc_caps_swapped = !is_esc_caps_swapped;
+            break;
+    }
+}
+
+void layer_key_fn(tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+        case 2:
+            layer_move(_GAMING);
             break;
     }
 }
@@ -195,6 +244,11 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_E] = ACTION_TAP_DANCE_FN(e_key_fn),
     [TD_Q] = ACTION_TAP_DANCE_FN(q_key_fn),
     [TD_C] = ACTION_TAP_DANCE_FN(c_key_fn),
+
+    [TD_ESC] = ACTION_TAP_DANCE_FN(esc_key_fn),
+    [TD_CAPS] = ACTION_TAP_DANCE_FN(caps_key_fn),
+
+    [TD_LYR] = ACTION_TAP_DANCE_FN(layer_key_fn),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -206,13 +260,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _EXC,    KC_W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC, KC_LSFT,  KC_SPC,    KC_BSPC,  KC_ENT,   TO(1)
+                                             _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TO(1)
                                       //`--------------------------'  `--------------------------'
   ),
 
     [_NUMS] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                      KC_PEQL,    KC_7,    KC_8,    KC_9, KC_PSLS,   KC_NO,
+       KC_TAB,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                       KC_EQL,    KC_7,    KC_8,    KC_9, KC_PSLS, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS,   KC_LT,     _GT,     _GR,     _LP,     _RP,                        _LEFT,   _DOWN,     _UP,  _RIGHT, KC_PPLS, KC_PAST,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -245,6 +299,30 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                             TO(0), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
   ),
+
+    [_GAMING] = LAYOUT_split_3x6_3(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_LSFT,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                             _ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(5)
+                                      //`--------------------------'  `--------------------------'
+  ),
+
+    [_GAMING2] = LAYOUT_split_3x6_3(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+       KC_GRV,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0,   _CAPS,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_TRNS,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,   KC_NO,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,   KC_NO,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                            TO(0), KC_LALT, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
+                                      //`--------------------------'  `--------------------------'
+  ),
 };
 
 /*
@@ -256,17 +334,16 @@ void keyboard_post_init_user(void) {
 */
 
 void matrix_scan_user(void) {
-    if (is_ctrl_gui_active && timer_elapsed(ctrl_gui_timer) > 1000) {
-        unregister_code(SUPER);
-        unregister_code(KC_LCTL);
-        is_ctrl_gui_active = false;
+    if (is_alt_tab_active && timer_elapsed(alt_tab_timer) > 750) {
+        unregister_code(KC_LALT);
+        is_alt_tab_active = false;
     }
 }
 
 #ifdef OLED_ENABLE
 
-#include "oled_luna.c"
-#include "oled_bongocat.c"
+#include "oled_right.c" // Bongocat
+#include "oled_left.c" // Luna & layer display
 
 oled_rotation_t oled_init_user(oled_rotation_t const rotation) {
     if (is_keyboard_master()) {
