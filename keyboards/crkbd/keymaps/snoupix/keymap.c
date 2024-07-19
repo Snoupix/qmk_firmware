@@ -192,7 +192,7 @@ void esc_key_fn(tap_dance_state_t *state, void *user_data) {
         case 1:
             tap_code16(is_esc_caps_swapped ? KC_CAPS : KC_ESC);
             break;
-        case 2:
+        case 4: // Since it's meant to be used on kb changes, not often
             is_esc_caps_swapped = !is_esc_caps_swapped;
             break;
     }
@@ -203,7 +203,7 @@ void caps_key_fn(tap_dance_state_t *state, void *user_data) {
         case 1:
             tap_code16(is_esc_caps_swapped ? KC_ESC : KC_CAPS);
             break;
-        case 2:
+        case 4:
             is_esc_caps_swapped = !is_esc_caps_swapped;
             break;
     }
@@ -260,7 +260,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _EXC,    KC_W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TO(1)
+                                             _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -272,7 +272,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, KC_QUOT,                         KC_0,    KC_1,    KC_2,    KC_3, KC_PDOT, KC_PENT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            TO(0), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   TO(2)
+                                            TO(2), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -342,8 +342,8 @@ void matrix_scan_user(void) {
 
 #ifdef OLED_ENABLE
 
-#include "oled_right.c" // Bongocat
-#include "oled_left.c" // Luna & layer display
+#include "oled_left.c" // Bongocat
+#include "oled_right.c" // Luna & layer display
 
 oled_rotation_t oled_init_user(oled_rotation_t const rotation) {
     if (is_keyboard_master()) {

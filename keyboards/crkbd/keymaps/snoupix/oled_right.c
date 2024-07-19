@@ -24,6 +24,7 @@
 */
 
 #include "color.h"
+#include "oled_driver.h"
 #include "rgb_matrix.h"
 #include QMK_KEYBOARD_H
 
@@ -268,6 +269,9 @@ bool oled_task_user(void) {
 #define ANIM_FRAME_DURATION 200 // how long each frame lasts in ms
 #define ANIM_SIZE 96 // number of bytes in array. If you change sprites, minimize for adequate firmware size. max is 1024
 
+#define LUNA_POS_X 0
+#define LUNA_POS_Y 13
+
 // timers
 uint32_t anim_timer = 0;
 uint32_t anim_sleep = 0;
@@ -283,6 +287,9 @@ bool isSneaking = false;
 bool isJumping  = false;
 bool showedJump = true;
 bool isBarking = false;
+
+uint8_t text_display_iter = 0;
+uint8_t oled_iter = 0;
 
 /* Sit */
 static const char PROGMEM sit[2][ANIM_SIZE] = {/* 'sit1', 32x22px */
@@ -337,9 +344,37 @@ static const char PROGMEM sneak[2][ANIM_SIZE] = {/* 'sneak1', 32x22px */
                                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x40, 0x40, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe0, 0xa0, 0x20, 0x40, 0x80, 0xc0, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3e, 0x41, 0xf0, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x02, 0x02, 0x04, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x40, 0x40, 0x55, 0x82, 0x7c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x20, 0x30, 0x0c, 0x02, 0x05, 0x09, 0x12, 0x1e, 0x04, 0x18, 0x10, 0x08, 0x10, 0x20, 0x28, 0x34, 0x06, 0x02, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
                                                  }};
 
-// animation
+// https://javl.github.io/image2cpp/
+// Backgound: black
+// Canvas size: 32x32
+// Scaling: Scale to fit
+// Tweak Brightness as you want
+// Code output: Plain bytes
+// Draw mode: Vertical 1 bit per pixel
+/* static char const rust_logo[] PROGMEM = {
+    // 'snoupix-rust', 32x32px
+    0x00, 0x00, 0x00, 0x80, 0x80, 0xe0, 0xe0, 0xf8, 0x78, 0x38, 0x3e, 0x1c, 0x1e, 0x1e, 0x1c, 0x27,
+    0x26, 0x1c, 0x1e, 0x1e, 0x1c, 0x3e, 0x38, 0x78, 0xf8, 0xe0, 0xe0, 0x80, 0x80, 0x00, 0x00, 0x00,
+    0x80, 0xb4, 0xfe, 0xff, 0x67, 0x3f, 0x11, 0x00, 0x00, 0x20, 0xfc, 0xfe, 0xff, 0xe3, 0xe3, 0xc0,
+    0xc0, 0xc3, 0xc3, 0xc7, 0x9f, 0x1f, 0x00, 0x00, 0x00, 0x11, 0x3f, 0x67, 0xff, 0xfc, 0xb4, 0x80,
+    0x00, 0x2d, 0x3f, 0xff, 0xfe, 0xe0, 0x80, 0x00, 0x00, 0xf8, 0xf8, 0xf1, 0xc3, 0xc3, 0x03, 0x07,
+    0xc7, 0xc7, 0xef, 0x7f, 0x7f, 0x3f, 0x0c, 0x00, 0x00, 0x80, 0xe0, 0xfe, 0xff, 0x3f, 0x2d, 0x01,
+    0x00, 0x00, 0x00, 0x01, 0x01, 0x07, 0x07, 0x1f, 0x19, 0x1d, 0x7f, 0x38, 0x78, 0x78, 0x38, 0xf0,
+    0xf0, 0x38, 0x78, 0x78, 0x38, 0x7f, 0x1d, 0x19, 0x1f, 0x07, 0x07, 0x01, 0x01, 0x00, 0x00, 0x00
+}; */
+static char const logo[] PROGMEM = {
+    // 'snoupix-rust', 32x32px
+    0x00, 0x00, 0x00, 0x80, 0x80, 0xe0, 0xe0, 0xf8, 0x78, 0x38, 0x3c, 0x1c, 0x1e, 0x0e, 0x1c, 0x26,
+    0x26, 0x1c, 0x0e, 0x1e, 0x1c, 0x3c, 0x38, 0x78, 0xf8, 0xe0, 0xe0, 0x80, 0x80, 0x00, 0x00, 0x00,
+    0x00, 0xb0, 0xfc, 0xff, 0x27, 0x2f, 0x11, 0x00, 0x00, 0x00, 0xfc, 0xfe, 0xfe, 0xe3, 0xc3, 0xc0,
+    0xc0, 0xc3, 0xc2, 0x86, 0x9f, 0x1f, 0x00, 0x00, 0x00, 0x11, 0x2f, 0x27, 0xff, 0xfc, 0xb0, 0x00,
+    0x00, 0x0d, 0x3f, 0xff, 0xf8, 0xe0, 0x80, 0x00, 0x00, 0xf8, 0xf8, 0x61, 0x41, 0xc3, 0x03, 0x03,
+    0xc7, 0xc7, 0xc7, 0x7f, 0x7f, 0x1f, 0x00, 0x00, 0x00, 0x80, 0xe0, 0xf8, 0xff, 0x3f, 0x0d, 0x00,
+    0x00, 0x00, 0x00, 0x01, 0x01, 0x07, 0x07, 0x1f, 0x19, 0x19, 0x3e, 0x38, 0x78, 0x70, 0x30, 0x70,
+    0x70, 0x30, 0x70, 0x78, 0x38, 0x3e, 0x19, 0x19, 0x1f, 0x07, 0x07, 0x01, 0x01, 0x00, 0x00, 0x00
+};
+
 void animate_luna(int LUNA_X, int LUNA_Y) {
-    // jump
     if (isJumping || !showedJump) {
         // clear
         oled_set_cursor(LUNA_X, LUNA_Y + 2);
@@ -359,7 +394,6 @@ void animate_luna(int LUNA_X, int LUNA_Y) {
     // switch frame
     current_frame = (current_frame + 1) % 2;
 
-    // current status
     if (led_usb_state.caps_lock) {
         oled_write_raw_P(bark[abs(1 - current_frame)], ANIM_SIZE);
 
@@ -377,9 +411,7 @@ void animate_luna(int LUNA_X, int LUNA_Y) {
     }
 }
 
-// logic
 static void render_luna(int LUNA_X, int LUNA_Y) {
-    // animation timer
     if (timer_elapsed32(anim_timer) > ANIM_FRAME_DURATION) {
         anim_timer = timer_read32();
         animate_luna(LUNA_X, LUNA_Y);
@@ -391,34 +423,14 @@ static void render_luna(int LUNA_X, int LUNA_Y) {
         anim_sleep = timer_read32();
     } else if(timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
         // clear
-        oled_set_cursor(0,0);
+        oled_set_cursor(0, 0);
         oled_write("                                                                                                    ", false);
         oled_off();
-        oled_set_cursor(LUNA_X,LUNA_Y);
+        oled_set_cursor(LUNA_X, LUNA_Y);
 
         current_wpm = 0;
     }
 }
-
-/* static void print_logo_narrow(void) {
-    if (current_wpm > 0) {
-        anim_sleep = timer_read32();
-        // wpm counter
-        oled_set_cursor(0, 14);
-        oled_write(get_u8_str(get_current_wpm(), '0'), false);
-
-        oled_set_cursor(0, 15);
-        oled_write(" wpm", false);
-
-        // this fixes the screen on and off bug
-
-    } else if(timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
-        // clear
-        oled_set_cursor(0,0);
-        oled_write("                                                                                                                        ", false);
-        oled_off();
-    }
-} */
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     // TODO: Keep eeprom's brightness state on new modes
@@ -446,11 +458,26 @@ layer_state_t layer_state_set_user(layer_state_t state) {
         rgb_matrix_sethsv_noeeprom(HSV_CHARTREUSE);
         break;
     }
-  return state;
+    return state;
+}
+
+// To make smooth transitions, you need to add 4 empty spaces at the end of the input string
+static void text_display(const char *str) {
+    if (text_display_iter == 0xff) {
+        text_display_iter = 0;
+    }
+
+    size_t len = strlen(str);
+
+    for (uint8_t j = 0; j < 5; j += 1) {
+        oled_write_char(str[(text_display_iter + j) % len], false);
+    }
+
+    text_display_iter += 1;
 }
 
 static void print_status_narrow(void) {
-    if (current_wpm == 0) {
+    /* if (current_wpm == 0) {
         oled_set_cursor(0, 0);
         // oled_write("                                                                                                                        ", false);
         oled_write("                                  ", false);
@@ -474,38 +501,59 @@ static void print_status_narrow(void) {
 
         oled_set_cursor(0, 1);
         oled_write(" wpm", false);
+    } */
+
+    oled_set_cursor(0, 0);
+
+    /* static char const corne_logo[] PROGMEM = {
+        0x80, 0x81, 0x82, 0x83, 0x84,
+        0xa0, 0xa1, 0xa2, 0xa3, 0xa4,
+        0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0};
+
+    oled_write_P(corne_logo, false); */
+
+    oled_write_raw_P(logo, sizeof(logo));
+
+    oled_set_cursor(0, 6);
+    if (oled_iter == 0xff) {
+        oled_iter = 0;
     }
+    if (oled_iter % 6 == 0) {
+        text_display("Snoupix    ");
+    }
+    oled_iter += 1;
 
-    oled_set_cursor(0, 7);
+    oled_set_cursor(0, 9);
 
+    // Somehow not working, even passing the var as an argument
     if (is_alt_tab_active) {
-        oled_write("AltTab", false);
+        oled_write("A-Tab", false);
     } else {
         switch (get_highest_layer(layer_state)) {
             case _DEFAULT:
-                oled_write("Qwer ", false);
+                oled_write("QWER ", false);
                 break;
             case _NUMS:
-                oled_write("Nbrs ", false);
+                oled_write("NBRS ", false);
                 break;
             case _SYMBOLS:
-                oled_write("Symb ", false);
+                oled_write("SYMB ", false);
                 break;
             case _EXTRA:
-                oled_write("Extra", false);
+                oled_write("EXTRA", false);
                 break;
             case _GAMING:
-                oled_write("Azer ", false);
+                oled_write("AZER ", false);
                 break;
             case _GAMING2:
-                oled_write("Fn   ", false);
+                oled_write("FN   ", false);
                 break;
             default:
-                oled_write("Undef", false);
+                oled_write("UNDEF", false);
         }
     }
 
-    render_luna(0, 13);
+    render_luna(LUNA_POS_X, LUNA_POS_Y);
 }
 
 #endif

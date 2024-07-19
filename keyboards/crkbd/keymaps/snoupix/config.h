@@ -99,13 +99,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_RAINBOW_PINWHEELS
 // #    define ENABLE_RGB_MATRIX_FLOWER_BLOOMING
 // #    define ENABLE_RGB_MATRIX_RAINDROPS
-#    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
+// #    define ENABLE_RGB_MATRIX_JELLYBEAN_RAINDROPS
 // #    define ENABLE_RGB_MATRIX_HUE_BREATHING
 // #    define ENABLE_RGB_MATRIX_HUE_PENDULUM
 // #    define ENABLE_RGB_MATRIX_HUE_WAVE
 // #    define ENABLE_RGB_MATRIX_PIXEL_RAIN
 // #    define ENABLE_RGB_MATRIX_PIXEL_FLOW
-// #    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
+#    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
 // enabled only if RGB_MATRIX_FRAMEBUFFER_EFFECTS is defined
 // #    define ENABLE_RGB_MATRIX_TYPING_HEATMAP
 // #    define ENABLE_RGB_MATRIX_DIGITAL_RAIN
@@ -122,7 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_MULTISPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_SPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
-#    define ENABLE_RGB_MATRIX_STARLIGHT
+// #    define ENABLE_RGB_MATRIX_STARLIGHT
 #endif
 
 #ifdef OLED_ENABLE
