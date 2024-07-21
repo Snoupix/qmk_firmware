@@ -36,6 +36,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define UNICODE_SELECTED_MODES UNICODE_MODE_LINUX
 #define LAYER_STATE_8BIT
 // #define DYNAMIC_KEYMAP_LAYER_COUNT 6
+#define SPLIT_MODS_ENABLE
+#define SPLIT_LED_STATE_ENABLE
+#define SPLIT_LAYER_STATE_ENABLE
+#define SPLIT_ACTIVITY_ENABLE
+#define SPLIT_TRANSACTION_IDS_USER M2S_SYNC
+#define M2S_SYNC_RATE_MS 500
+
+#ifdef OLED_ENABLE
+#    define SPLIT_TRANSPORT_MIRROR
+#    define SPLIT_OLED_STATE_ENABLE
+#    define SPLIT_WPM_ENABLE
+// #    define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
+#    undef OLED_FONT_H
+#    define OLED_FONT_H "oled_font.c"
+// https://docs.qmk.fm/features/oled_driver#basic-configuration
+#    define OLED_TIMEOUT 60000
+#endif
 
 #ifdef RGBLIGHT_ENABLE
     #define RGBLIGHT_EFFECT_BREATHING
@@ -58,8 +75,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // https://docs.qmk.fm/features/rgb_matrix#rgb-matrix-effects
 #ifdef RGB_MATRIX_ENABLE
 // #   define RGB_MATRIX_KEYPRESSES // reacts to keypresses
-// #   define RGB_MATRIX_KEYRELEASES // reacts to keyreleases (instead of keypresses)
-#   define RGB_MATRIX_TIMEOUT OLED_TIMEOUT * 2
+#   define RGB_MATRIX_KEYRELEASES // reacts to keyreleases (instead of keypresses)
+#   define RGB_MATRIX_TIMEOUT (OLED_TIMEOUT * 4)
 #   define RGB_MATRIX_SLEEP // turn off effects when suspended
 #   define RGB_MATRIX_FRAMEBUFFER_EFFECTS
 // #   define RGB_MATRIX_LED_PROCESS_LIMIT (RGB_MATRIX_LED_COUNT + 4) / 5 // limits the number of LEDs to process in an animation per task run (increases keyboard responsiveness)
@@ -105,7 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_HUE_WAVE
 // #    define ENABLE_RGB_MATRIX_PIXEL_RAIN
 // #    define ENABLE_RGB_MATRIX_PIXEL_FLOW
-#    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
+// #    define ENABLE_RGB_MATRIX_PIXEL_FRACTAL
 // enabled only if RGB_MATRIX_FRAMEBUFFER_EFFECTS is defined
 // #    define ENABLE_RGB_MATRIX_TYPING_HEATMAP
 // #    define ENABLE_RGB_MATRIX_DIGITAL_RAIN
@@ -119,18 +136,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // #    define ENABLE_RGB_MATRIX_SOLID_REACTIVE_NEXUS
 // #    define ENABLE_RGB_MATRIX_SOLID_REACTIVE_MULTINEXUS
 // #    define ENABLE_RGB_MATRIX_SPLASH
-// #    define ENABLE_RGB_MATRIX_MULTISPLASH
+#    define ENABLE_RGB_MATRIX_MULTISPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_SPLASH
 // #    define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
 // #    define ENABLE_RGB_MATRIX_STARLIGHT
-#endif
-
-#ifdef OLED_ENABLE
-//#    define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
-#    undef OLED_FONT_H
-#    define OLED_FONT_H "oled_font.c"
-#    define SPLIT_MODS_ENABLE
-#    define SPLIT_LED_STATE_ENABLE
-#    define SPLIT_LAYER_STATE_ENABLE
-#    define SPLIT_WPM_ENABLE // Enable WPM across split keyboards (+268).
 #endif

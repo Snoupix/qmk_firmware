@@ -13,27 +13,20 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +368 keyboards/crkbd/keymaps/snoupix/keymap.c
+badd +439 keyboards/crkbd/keymaps/snoupix/keymap.c
 badd +29 keyboards/crkbd/keymaps/snoupix/rules.mk
 badd +1 keyboards/crkbd/keymaps/snoupix/oled_font.c
 badd +9 keyboards/crkbd/keymaps/snoupix/oled_icons.c
-badd +83 keyboards/crkbd/keymaps/snoupix/config.h
+badd +39 keyboards/crkbd/keymaps/snoupix/config.h
 badd +24 display_keymap.rs
-badd +476 keyboards/crkbd/keymaps/snoupix/oled_right.c
-badd +253 keyboards/crkbd/keymaps/snoupix/oled_left.c
+badd +471 keyboards/crkbd/keymaps/snoupix/oled_right.c
+badd +174 keyboards/crkbd/keymaps/snoupix/oled_left.c
 badd +1 .gitignore
 argglobal
 %argdel
-edit keyboards/crkbd/keymaps/snoupix/oled_right.c
-wincmd t
-let s:save_winminheight = &winminheight
-let s:save_winminwidth = &winminwidth
-set winminheight=0
-set winheight=1
-set winminwidth=0
-set winwidth=1
+edit keyboards/crkbd/keymaps/snoupix/oled_left.c
 argglobal
-balt keyboards/crkbd/keymaps/snoupix/config.h
+balt keyboards/crkbd/keymaps/snoupix/oled_right.c
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -44,12 +37,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 477 - ((27 * winheight(0) + 27) / 55)
+let s:l = 173 - ((28 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 477
-normal! 0
+keepjumps 173
+normal! 015|
 lcd /home/snoupix/work/qmk
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
@@ -58,8 +51,6 @@ endif
 unlet! s:wipebuf
 set winheight=1 winwidth=20
 let &shortmess = s:shortmess_save
-let &winminheight = s:save_winminheight
-let &winminwidth = s:save_winminwidth
 let s:sx = expand("<sfile>:p:r")."x.vim"
 if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)

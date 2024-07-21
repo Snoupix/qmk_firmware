@@ -24,8 +24,10 @@
 */
 
 #include "color.h"
+#include "keyboard.h"
 #include "oled_driver.h"
 #include "rgb_matrix.h"
+#include "timer.h"
 #include QMK_KEYBOARD_H
 
 #ifdef OLD_LUNA
@@ -272,24 +274,17 @@ bool oled_task_user(void) {
 #define LUNA_POS_X 0
 #define LUNA_POS_Y 13
 
-// timers
-uint32_t anim_timer = 0;
-uint32_t anim_sleep = 0;
+bool is_sneaking = false;
+// bool is_jumping  = false;
+// bool showed_jump = true;
+bool is_barking = false;
 
-// current frame
-uint8_t current_frame = 0;
-
-// status variables
-int current_wpm = 0;
-led_t led_usb_state;
-
-bool isSneaking = false;
-bool isJumping  = false;
-bool showedJump = true;
-bool isBarking = false;
-
-uint8_t text_display_iter = 0;
-uint8_t oled_frames = 0;
+led_t    led_usb_state;
+uint8_t  current_wpm       = 0;
+uint32_t anim_timer        = 0;
+uint8_t  current_frame     = 0;
+uint8_t  text_display_iter = 0;
+uint8_t  oled_frames       = 0;
 
 /* Sit */
 static const char PROGMEM sit[2][ANIM_SIZE] = {/* 'sit1', 32x22px */
@@ -375,7 +370,7 @@ static char const logo[] PROGMEM = {
     0x00, 0x00, 0x00, 0x01, 0x01, 0x07, 0x07, 0x1f, 0x19, 0x19, 0x3e, 0x38, 0x78, 0x70, 0x30, 0x70,
     0x70, 0x30, 0x70, 0x78, 0x38, 0x3e, 0x19, 0x19, 0x1f, 0x07, 0x07, 0x01, 0x01, 0x00, 0x00, 0x00
 };
-static char const logo_clear[] PROGMEM = {
+static char const clear_logo[] PROGMEM = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -387,21 +382,19 @@ static char const logo_clear[] PROGMEM = {
 };
 
 void animate_luna(int LUNA_X, int LUNA_Y) {
-    if (isJumping || !showedJump) {
-        // clear
+    /* if (is_jumping || !showed_jump) {
         oled_set_cursor(LUNA_X, LUNA_Y + 2);
         oled_write("     ", false);
 
         oled_set_cursor(LUNA_X, LUNA_Y - 1);
 
-        showedJump = true;
-    } else {
-        // clear
+        showed_jump = true;
+    } else { */
         oled_set_cursor(LUNA_X, LUNA_Y - 1);
         oled_write("     ", false);
 
         oled_set_cursor(LUNA_X, LUNA_Y);
-    }
+    // }
 
     // switch frame
     current_frame = (current_frame + 1) % 2;
@@ -409,7 +402,7 @@ void animate_luna(int LUNA_X, int LUNA_Y) {
     if (led_usb_state.caps_lock) {
         oled_write_raw_P(bark[abs(1 - current_frame)], ANIM_SIZE);
 
-    } else if (isSneaking) {
+    } else if (is_sneaking) {
         oled_write_raw_P(sneak[abs(1 - current_frame)], ANIM_SIZE);
 
     } else if (current_wpm <= MIN_WALK_SPEED) {
@@ -468,20 +461,21 @@ static void text_display(const char *str) {
 }
 
 static void print_status_narrow(void) {
-    // this fixes the screen on and off bug
-    if (current_wpm > 0) {
-        oled_on();
-        anim_sleep = timer_read32();
-    } else if(timer_elapsed32(anim_sleep) > OLED_TIMEOUT) {
+    if (timer_elapsed32(last_activity) > OLED_TIMEOUT || !globals.is_oled_on) {
         if (!is_oled_on()) {
             return;
         }
+        // Not usig oled_clear() because it doesn't clear the whole scren then causes screen to turn on/off with a part of it still displayed
         oled_set_cursor(0, 0);
-        oled_write_raw_P(logo_clear, sizeof(logo_clear));
+        oled_write_raw_P(clear_logo, sizeof(clear_logo)); // somehow needed to avoid some sort of screen blinks with a few pixels
         oled_write("                                                                                                    ", false);
         oled_off();
 
         return;
+    }
+
+    if (!is_oled_on()) {
+        oled_on();
     }
 
     oled_set_cursor(0, 0);
@@ -498,13 +492,12 @@ static void print_status_narrow(void) {
 
     oled_set_cursor(0, 9);
 
-    // Somehow not working, even passing the var as an argument
-    if (is_alt_tab_active) {
-        oled_write("A-Tab", false);
+    if (globals.is_alt_tab_active) {
+        oled_write("A-TAB", false);
     } else {
         switch (get_highest_layer(layer_state)) {
             case _DEFAULT:
-                oled_write("QWER ", false);
+                oled_write("BASE ", false);
                 break;
             case _NUMS:
                 oled_write("NBRS ", false);
@@ -516,7 +509,7 @@ static void print_status_narrow(void) {
                 oled_write("EXTRA", false);
                 break;
             case _GAMING:
-                oled_write("AZER ", false);
+                oled_write("GAME ", false);
                 break;
             case _GAMING2:
                 oled_write("FN   ", false);
