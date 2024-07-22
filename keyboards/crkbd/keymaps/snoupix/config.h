@@ -52,7 +52,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    undef OLED_FONT_H
 #    define OLED_FONT_H "oled_font.c"
 // https://docs.qmk.fm/features/oled_driver#basic-configuration
-#    define OLED_TIMEOUT 60000
+#    define OLED_TIMEOUT (60000 * 5)
 #endif
 
 #ifdef RGBLIGHT_ENABLE
@@ -77,7 +77,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef RGB_MATRIX_ENABLE
 // #   define RGB_MATRIX_KEYPRESSES // reacts to keypresses
 #   define RGB_MATRIX_KEYRELEASES // reacts to keyreleases (instead of keypresses)
-#   define RGB_MATRIX_TIMEOUT (OLED_TIMEOUT * 4)
+#   define RGB_MATRIX_TIMEOUT (OLED_TIMEOUT * 2)
 #   define RGB_MATRIX_SLEEP // turn off effects when suspended
 #   define RGB_MATRIX_FRAMEBUFFER_EFFECTS
 // #   define RGB_MATRIX_LED_PROCESS_LIMIT (RGB_MATRIX_LED_COUNT + 4) / 5 // limits the number of LEDs to process in an animation per task run (increases keyboard responsiveness)

@@ -41,8 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Home row mods layer 2 left side
 #define _GT LCTL_T(KC_GT)
 #define _GR LSFT_T(KC_GRV)
-#define _LP LALT_T(KC_LPRN)
-#define _RP LGUI_T(KC_RPRN)
+#define _LP LALT_T(S(KC_LPRN)) // TODO: Fix these two
+#define _RP LGUI_T(S(KC_RPRN))
 
 // Special tap dance
 #define _AND TD(TD_AND)

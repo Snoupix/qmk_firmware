@@ -17,9 +17,9 @@ badd +350 keyboards/crkbd/keymaps/snoupix/keymap.c
 badd +29 keyboards/crkbd/keymaps/snoupix/rules.mk
 badd +1 keyboards/crkbd/keymaps/snoupix/oled_font.c
 badd +9 keyboards/crkbd/keymaps/snoupix/oled_icons.c
-badd +94 keyboards/crkbd/keymaps/snoupix/config.h
+badd +36 keyboards/crkbd/keymaps/snoupix/config.h
 badd +24 display_keymap.rs
-badd +492 keyboards/crkbd/keymaps/snoupix/oled_right.c
+badd +458 keyboards/crkbd/keymaps/snoupix/oled_right.c
 badd +137 keyboards/crkbd/keymaps/snoupix/oled_left.c
 badd +1 .gitignore
 argglobal
@@ -37,12 +37,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 348 - ((36 * winheight(0) + 27) / 55)
+let s:l = 350 - ((44 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 348
-normal! 032|
+keepjumps 350
+normal! 013|
 lcd /home/snoupix/work/qmk
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
