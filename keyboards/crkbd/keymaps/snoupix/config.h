@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define NO_MUSIC_MODE
 #define TAPPING_TERM 175
 #define TAPPING_TERM_PER_KEY
+#define TAPPING_TOGGLE 2
 #define UNICODE_SELECTED_MODES UNICODE_MODE_LINUX
 #define LAYER_STATE_8BIT
 // #define DYNAMIC_KEYMAP_LAYER_COUNT 6

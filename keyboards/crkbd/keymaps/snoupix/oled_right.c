@@ -279,9 +279,8 @@ bool is_sneaking = false;
 // bool showed_jump = true;
 bool is_barking = false;
 
-led_t    led_usb_state;
-uint8_t  current_wpm       = 0;
 uint32_t anim_timer        = 0;
+uint8_t  current_wpm       = 0;
 uint8_t  current_frame     = 0;
 uint8_t  text_display_iter = 0;
 uint8_t  oled_frames       = 0;
@@ -389,7 +388,7 @@ void animate_luna(int LUNA_X, int LUNA_Y) {
     // switch frame
     current_frame = (current_frame + 1) % 2;
 
-    if (led_usb_state.caps_lock) {
+    if (globals.led_usb_state.caps_lock) {
         oled_write_raw_P(bark[abs(1 - current_frame)], ANIM_SIZE);
 
     } else if (is_sneaking) {
@@ -427,7 +426,11 @@ layer_state_t layer_state_set_user(layer_state_t state) {
     case _GAMING:
         rgb_matrix_reload_from_eeprom();
         break;
-    case _GAMING2:
+    case _RTS:
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
+        rgb_matrix_sethsv_noeeprom(HSV_AZURE);
+        break;
+    case _GAMING_UPPER:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
         rgb_matrix_sethsv_noeeprom(HSV_CHARTREUSE);
         break;
@@ -468,26 +471,29 @@ static void render_luna(void) {
         oled_write("A-TAB", false);
     } else {
         switch (get_highest_layer(layer_state)) {
-            case _DEFAULT:
-                oled_write("BASE ", false);
-                break;
-            case _NUMS:
-                oled_write("NBRS ", false);
-                break;
-            case _SYMBOLS:
-                oled_write("SYMB ", false);
-                break;
-            case _EXTRA:
-                oled_write("EXTRA", false);
-                break;
-            case _GAMING:
-                oled_write("GAME ", false);
-                break;
-            case _GAMING2:
-                oled_write("FN   ", false);
-                break;
-            default:
-                oled_write("UNDEF", false);
+        case _DEFAULT:
+            oled_write("BASE ", false);
+            break;
+        case _NUMS:
+            oled_write("NBRS ", false);
+            break;
+        case _SYMBOLS:
+            oled_write("SYMBS", false);
+            break;
+        case _EXTRA:
+            oled_write("EXTRA", false);
+            break;
+        case _GAMING:
+            oled_write("GAME ", false);
+            break;
+        case _RTS:
+            oled_write("RTS  ", false);
+            break;
+        case _GAMING_UPPER:
+            oled_write("FNs  ", false);
+            break;
+        default:
+            oled_write("UNDEF", false);
         }
     }
 

@@ -64,18 +64,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _LYR TD(TD_LYR)
 
 typedef struct Globals {
-    bool is_oled_on;
-    bool is_alt_tab_active;
-    bool is_esc_caps_swapped;
-    uint16_t alt_tab_timer;
+    bool  is_oled_on;
+    bool  is_alt_tab_active;
+    bool  is_esc_caps_swapped;
+    led_t led_usb_state;
 } globals_t;
 
 static globals_t globals = {
     .is_oled_on = true,
     .is_alt_tab_active = false,
     .is_esc_caps_swapped = false,
-    .alt_tab_timer = 0,
 };
+
+uint16_t alt_tab_timer = 0;
 
 enum layers {
     _DEFAULT,
@@ -83,8 +84,8 @@ enum layers {
     _SYMBOLS,
     _EXTRA,
     _GAMING,
-    _GAMING2,
-    // _RTS,
+    _RTS,
+    _GAMING_UPPER,
 };
 
 enum tap_dance {
@@ -116,7 +117,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1: // One shot press
         if (globals.is_alt_tab_active) {
-            globals.alt_tab_timer = timer_read();
+            alt_tab_timer = timer_read();
         }
 
         tap_code16(globals.is_alt_tab_active ? KC_TAB : KC_Q);
@@ -130,7 +131,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
 
         register_code(KC_LALT);
         globals.is_alt_tab_active = true;
-        globals.alt_tab_timer = timer_read();
+        alt_tab_timer = timer_read();
         break;
     }
 }
@@ -218,7 +219,10 @@ void esc_key_fn(tap_dance_state_t *state, void *user_data) {
     case 1:
         tap_code16(globals.is_esc_caps_swapped ? KC_CAPS : KC_ESC);
         break;
-    case 4: // Since it's meant to be used on kb changes, not often
+    case 2:
+    case 3:
+        break;
+    default: // Since it's meant to be used on key layout changes so, not often
         globals.is_esc_caps_swapped = !globals.is_esc_caps_swapped;
         break;
     }
@@ -277,7 +281,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _EXC,    KC_W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(1)
+                                             _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TT(1)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -289,7 +293,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, KC_QUOT,                         KC_0,    KC_1,    KC_2,    KC_3, KC_PDOT, KC_PENT,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            TO(2), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
+                                            TO(2), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,    TO(0)
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -325,41 +329,40 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(5)
+                                             _ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(6)
                                       //`--------------------------'  `--------------------------'
   ),
 
-    [_GAMING2] = LAYOUT_split_3x6_3(
+    [_RTS] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_GRV,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0,   _CAPS,
+      KC_LSFT,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_TRNS,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,   KC_NO,
+      KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+       KC_TAB,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                             _ESC,   MO(6),  KC_SPC,    KC_BSPC,  KC_ENT, KC_LALT
+                                      //`--------------------------'  `--------------------------'
+  ),
+
+    [_GAMING_UPPER] = LAYOUT_split_3x6_3(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+      KC_TRNS,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0,   _CAPS,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_TRNS,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_GRV,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,   KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            TO(0), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
+                                            TO(0), KC_TRNS,   TO(5),    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
   ),
-
-    // TODO
-    /* [_RTS] = LAYOUT_split_3x6_3(
-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(5)
-                                      //`--------------------------'  `--------------------------'
-  ), */
 };
 
 void master_to_slave_sync(uint8_t in_buflen, const void* in_data, uint8_t _out_buflen, void* _out_data) {
     const globals_t *m_data = (const globals_t*)in_data;
 
     globals.is_oled_on = m_data->is_oled_on;
-    globals.alt_tab_timer = m_data->alt_tab_timer;
+    globals.led_usb_state = m_data->led_usb_state;
     globals.is_alt_tab_active = m_data->is_alt_tab_active;
     globals.is_esc_caps_swapped = m_data->is_esc_caps_swapped;
 }
@@ -386,7 +389,7 @@ void housekeeping_task_user(void) {
 }
 
 void matrix_scan_user(void) {
-    if (globals.is_alt_tab_active && timer_elapsed(globals.alt_tab_timer) > 750) {
+    if (globals.is_alt_tab_active && timer_elapsed(alt_tab_timer) > 750) {
         unregister_code(KC_LALT);
         globals.is_alt_tab_active = false;
     }
@@ -406,8 +409,8 @@ oled_rotation_t oled_init_user(oled_rotation_t const rotation) {
 }
 
 bool oled_task_user(void) {
-    current_wpm = get_current_wpm();
-    led_usb_state = host_keyboard_led_state();
+    current_wpm = get_current_wpm(); // declared and used on oled_right
+    globals.led_usb_state = host_keyboard_led_state();
 
     if (last_matrix_activity_elapsed() > OLED_TIMEOUT || !globals.is_oled_on) {
         oled_off();
