@@ -24,6 +24,7 @@
      'render_mod_status()' with your own function.
  */
 
+#include "keyboard.h"
 #include "oled_driver.h"
 #include QMK_KEYBOARD_H
 
@@ -118,6 +119,7 @@ static unsigned char const tap1[] PROGMEM = {151,
 static unsigned char const *tap[TAP_FRAMES] = {
     tap0, tap1 };
 
+uint16_t frame_timer = 0;
 
 // RLE decoding loop that reads count from frame index
 // If count >= 0x80, next (count - 128) bytes are unique
@@ -163,21 +165,8 @@ static void animate_cat(uint32_t interval) {
 
 
 static void render_bongocat(void) {
-    static uint16_t frame_timer = 0;
-
-    if (timer_elapsed32(last_activity) > OLED_TIMEOUT || !globals.is_oled_on) {
-        if (is_oled_on()) {
-            // oled_set_cursor(0, 0);
-            // oled_write_raw_P(0, 128*32);
-            // oled_write("                                                                                                    ", false);
-            oled_clear();
-            oled_off();
-        }
-    } else if (timer_elapsed(frame_timer) > FRAME_DURATION) {
-        if (!is_oled_on()) {
-            oled_on();
-        }
+    if (timer_elapsed(frame_timer) > FRAME_DURATION) {
         frame_timer = timer_read();
-        animate_cat(timer_elapsed32(last_activity));
+        animate_cat(last_input_activity_elapsed());
     }
 }

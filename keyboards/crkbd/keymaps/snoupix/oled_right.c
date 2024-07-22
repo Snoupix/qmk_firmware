@@ -370,16 +370,6 @@ static char const logo[] PROGMEM = {
     0x00, 0x00, 0x00, 0x01, 0x01, 0x07, 0x07, 0x1f, 0x19, 0x19, 0x3e, 0x38, 0x78, 0x70, 0x30, 0x70,
     0x70, 0x30, 0x70, 0x78, 0x38, 0x3e, 0x19, 0x19, 0x1f, 0x07, 0x07, 0x01, 0x01, 0x00, 0x00, 0x00
 };
-static char const clear_logo[] PROGMEM = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
 void animate_luna(int LUNA_X, int LUNA_Y) {
     /* if (is_jumping || !showed_jump) {
@@ -460,25 +450,7 @@ static void text_display(const char *str) {
     text_display_iter += 1;
 }
 
-static void print_status_narrow(void) {
-    if (timer_elapsed32(last_activity) > OLED_TIMEOUT || !globals.is_oled_on) {
-        if (!is_oled_on()) {
-            return;
-        }
-        // Not usig oled_clear() because it doesn't clear the whole scren then causes screen to turn on/off with a part of it still displayed
-        oled_set_cursor(0, 0);
-        oled_write_raw_P(clear_logo, sizeof(clear_logo)); // somehow needed to avoid some sort of screen blinks with a few pixels
-        oled_write("                                                                                                    ", false);
-        oled_off();
-
-        return;
-    }
-
-    if (!is_oled_on()) {
-        oled_on();
-    }
-
-    oled_set_cursor(0, 0);
+static void render_luna(void) {
     oled_write_raw_P(logo, sizeof(logo));
 
     oled_set_cursor(0, 6);

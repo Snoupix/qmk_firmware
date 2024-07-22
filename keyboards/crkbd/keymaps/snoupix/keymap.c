@@ -77,8 +77,6 @@ static globals_t globals = {
     .alt_tab_timer = 0,
 };
 
-uint32_t last_activity = 0;
-
 enum layers {
     _DEFAULT,
     _NUMS,
@@ -410,7 +408,13 @@ oled_rotation_t oled_init_user(oled_rotation_t const rotation) {
 bool oled_task_user(void) {
     current_wpm = get_current_wpm();
     led_usb_state = host_keyboard_led_state();
-    last_activity = last_matrix_activity_time();
+
+    if (last_matrix_activity_elapsed() > OLED_TIMEOUT || !globals.is_oled_on) {
+        oled_off();
+        return false;
+    }
+
+    oled_on();
 
     if (is_keyboard_master()) {
         render_bongocat();
@@ -418,7 +422,7 @@ bool oled_task_user(void) {
         #ifdef OLD_LUNA
         render_luna_status();
         #else
-        print_status_narrow();
+        render_luna();
         #endif
     }
     return false;
