@@ -36,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TAPPING_TOGGLE 2
 #define UNICODE_SELECTED_MODES UNICODE_MODE_LINUX
 #define LAYER_STATE_8BIT
-// #define DYNAMIC_KEYMAP_LAYER_COUNT 6
 #define SPLIT_MODS_ENABLE
 #define SPLIT_LED_STATE_ENABLE
 #define SPLIT_LAYER_STATE_ENABLE

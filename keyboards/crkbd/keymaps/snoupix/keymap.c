@@ -58,6 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _Z TD(TD_Z)
 #define _R TD(TD_R)
 #define _C TD(TD_C)
+#define _U TD(TD_U)
 
 #define _CAPS TD(TD_CAPS)
 #define _ESC TD(TD_ESC)
@@ -103,6 +104,7 @@ enum tap_dance {
     TD_R,
     TD_Q,
     TD_C,
+    TD_U,
 
     TD_ESC,
     TD_CAPS,
@@ -208,7 +210,7 @@ void r_key_fn(tap_dance_state_t *state, void *user_data) {
     case 3:
         tap_code16(FR_EGRV);
         break;
-    case 4:
+    default: // 4 and more fk counting
         tap_code16(FR_CIRC);
         break;
     }
@@ -250,6 +252,17 @@ void layer_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
+void u_key_fn(tap_dance_state_t *state, void *user_data) {
+    switch (state->count) {
+    case 1:
+        tap_code16(KC_U);
+        break;
+    case 2:
+        tap_code16(FR_UGRV);
+        break;
+    }
+}
+
 tap_dance_action_t tap_dance_actions[] = {
     [TD_AND] = ACTION_TAP_DANCE_DOUBLE(KC_UNDS, KC_PIPE),
     [TD_OR] = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
@@ -265,6 +278,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_R] = ACTION_TAP_DANCE_FN(r_key_fn),
     [TD_Q] = ACTION_TAP_DANCE_FN(q_key_fn),
     [TD_C] = ACTION_TAP_DANCE_FN(c_key_fn),
+    [TD_U] = ACTION_TAP_DANCE_FN(u_key_fn),
 
     [TD_ESC] = ACTION_TAP_DANCE_FN(esc_key_fn),
     [TD_CAPS] = ACTION_TAP_DANCE_FN(caps_key_fn),
@@ -275,7 +289,7 @@ tap_dance_action_t tap_dance_actions[] = {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DEFAULT] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,      _A,      _Z,    KC_E,      _R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
+       KC_TAB,      _A,      _Z,    KC_E,      _R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,    KC_M,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -329,7 +343,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(6)
+                                           KC_ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(6)
                                       //`--------------------------'  `--------------------------'
   ),
 
