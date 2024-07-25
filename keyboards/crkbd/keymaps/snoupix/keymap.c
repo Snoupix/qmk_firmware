@@ -1,6 +1,7 @@
 /*
 Copyright 2019 @foostan
 Copyright 2020 Drashna Jaelre <@drashna>
+Copyright 2024 @Snoupix
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <stdint.h>
 #include "action_layer.h"
 #include "keyboard.h"
 #include "keycodes.h"
@@ -26,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Home row mods start
 #define SUPER KC_LEFT_GUI
-#define _Q TD(TD_Q)
 #define _S LCTL_T(KC_S)
 #define _D LSFT_T(KC_D)
 #define _F LALT_T(KC_F)
@@ -41,22 +42,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Home row mods layer 2 left side
 #define _GT LCTL_T(KC_GT)
 #define _GR LSFT_T(KC_GRV)
-#define _LP LALT_T(S(KC_LPRN)) // TODO: Fix these two
-#define _RP LGUI_T(S(KC_RPRN))
+#define _LP LALT_T(KC_LPRN) // TODO: Fix these two (special keycodes doesn't work on mod taps)
+#define _RP LGUI_T(KC_RPRN)
 
 // Special tap dance
 #define _AND TD(TD_AND)
 #define _OR TD(TD_OR)
 #define _EXC TD(TD_EXC)
-
 #define _LEFT TD(TD_MINUS)
 #define _DOWN TD(TD_4)
 #define _UP TD(TD_5)
 #define _RIGHT TD(TD_6)
 
+#define _Q TD(TD_Q)
 #define _A TD(TD_A)
 #define _Z TD(TD_Z)
-#define _R TD(TD_R)
+#define _E TD(TD_E)
 #define _C TD(TD_C)
 #define _U TD(TD_U)
 
@@ -65,19 +66,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _LYR TD(TD_LYR)
 
 typedef struct Globals {
-    bool  is_oled_on;
-    bool  is_alt_tab_active;
-    bool  is_esc_caps_swapped;
-    led_t led_usb_state;
+    bool     is_oled_on;
+    bool     is_alt_tab_active;
+    bool     is_esc_caps_swapped;
+    bool     is_french_enabled;
+    led_t    led_usb_state;
+    uint16_t alt_tab_timer;
 } globals_t;
 
 static globals_t globals = {
     .is_oled_on = true,
     .is_alt_tab_active = false,
+    .alt_tab_timer = 0,
     .is_esc_caps_swapped = false,
+    .is_french_enabled = false,
 };
-
-uint16_t alt_tab_timer = 0;
 
 enum layers {
     _DEFAULT,
@@ -101,7 +104,7 @@ enum tap_dance {
 
     TD_A,
     TD_Z,
-    TD_R,
+    TD_E,
     TD_Q,
     TD_C,
     TD_U,
@@ -113,13 +116,22 @@ enum tap_dance {
 
 enum custom_keycodes {
     TOG_OLED = SAFE_RANGE,
+    TOG_FR,
+};
+
+uint16_t const td_to_kc[] = {
+    [TD_A] = KC_A,
+    [TD_Z] = KC_Z,
+    [TD_E] = KC_E,
+    [TD_C] = KC_C,
+    [TD_U] = KC_U,
 };
 
 void q_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1: // One shot press
         if (globals.is_alt_tab_active) {
-            alt_tab_timer = timer_read();
+            globals.alt_tab_timer = timer_read();
         }
 
         tap_code16(globals.is_alt_tab_active ? KC_TAB : KC_Q);
@@ -133,7 +145,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
 
         register_code(KC_LALT);
         globals.is_alt_tab_active = true;
-        alt_tab_timer = timer_read();
+        globals.alt_tab_timer = timer_read();
         break;
     }
 }
@@ -141,14 +153,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
 void a_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1:
-        switch (get_highest_layer(layer_state)) {
-            case _DEFAULT:
-                tap_code16(KC_A);
-                break;
-            case _GAMING:
-                tap_code16(KC_Q);
-                break;
-        }
+        tap_code16(KC_A);
         break;
     case 2:
         tap_code16(FR_AGRV);
@@ -158,18 +163,20 @@ void a_key_fn(tap_dance_state_t *state, void *user_data) {
 
 void z_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
-    case 3: // Need to zz in nvim so fuck that
-        tap_code16(FR_EURO);
+    case 1:
+        tap_code16(KC_Z);
         break;
     default:
-        for (uint8_t i = 0; i < state->count; i += 1) {
-            tap_code16(KC_Z);
-        }
+        tap_code16(FR_EURO);
         break;
     }
 }
 
 void c_key_fn(tap_dance_state_t *state, void *user_data) {
+    if (!globals.is_french_enabled) {
+        return tap_code16(KC_C);
+    }
+
     switch (state->count) {
     case 1:
         tap_code16(KC_C);
@@ -180,29 +187,14 @@ void c_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-// Changed it from e to r because a lot of words needs a double e and that was annoying
-void r_key_fn(tap_dance_state_t *state, void *user_data) {
-    /* if (!globals.is_q_held) {
-        for (uint8_t i = 0; i < state->count; i += 1) {
-            tap_code16(KC_E);
-        }
-        return;
+void e_key_fn(tap_dance_state_t *state, void *user_data) {
+    if (!globals.is_french_enabled) {
+        return tap_code16(KC_E);
     }
 
     switch (state->count) {
     case 1:
-        tap_code16(FR_EACU);
-        break;
-    case 2:
-        tap_code16(FR_EGRV);
-        break;
-    case 3:
-        tap_code16(FR_CIRC);
-        break;
-    } */
-    switch (state->count) {
-    case 1:
-        tap_code16(KC_R);
+        tap_code16(KC_E);
         break;
     case 2:
         tap_code16(FR_EACU);
@@ -212,6 +204,21 @@ void r_key_fn(tap_dance_state_t *state, void *user_data) {
         break;
     default: // 4 and more fk counting
         tap_code16(FR_CIRC);
+        break;
+    }
+}
+
+void u_key_fn(tap_dance_state_t *state, void *user_data) {
+    if (!globals.is_french_enabled) {
+        return tap_code16(KC_U);
+    }
+
+    switch (state->count) {
+    case 1:
+        tap_code16(KC_U);
+        break;
+    case 2:
+        tap_code16(FR_UGRV);
         break;
     }
 }
@@ -252,17 +259,6 @@ void layer_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void u_key_fn(tap_dance_state_t *state, void *user_data) {
-    switch (state->count) {
-    case 1:
-        tap_code16(KC_U);
-        break;
-    case 2:
-        tap_code16(FR_UGRV);
-        break;
-    }
-}
-
 tap_dance_action_t tap_dance_actions[] = {
     [TD_AND] = ACTION_TAP_DANCE_DOUBLE(KC_UNDS, KC_PIPE),
     [TD_OR] = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
@@ -275,7 +271,7 @@ tap_dance_action_t tap_dance_actions[] = {
 
     [TD_A] = ACTION_TAP_DANCE_FN(a_key_fn),
     [TD_Z] = ACTION_TAP_DANCE_FN(z_key_fn),
-    [TD_R] = ACTION_TAP_DANCE_FN(r_key_fn),
+    [TD_E] = ACTION_TAP_DANCE_FN(e_key_fn),
     [TD_Q] = ACTION_TAP_DANCE_FN(q_key_fn),
     [TD_C] = ACTION_TAP_DANCE_FN(c_key_fn),
     [TD_U] = ACTION_TAP_DANCE_FN(u_key_fn),
@@ -287,9 +283,11 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    // TODO: Move the upper keys (tap dances) GAMING layer to be used as an AZERTY layer without TD for gaming and with TD for normal FR text
+    // then, maybe change the FR toggle key
     [_DEFAULT] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,      _A,      _Z,    KC_E,      _R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
+       KC_TAB,      _A,      _Z,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,    KC_M,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -325,7 +323,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_EXTRA] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      RGB_TOG,TOG_OLED,   KC_NO,   KC_NO,   KC_NO, BL_TOGG,                      BL_STEP,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
+      RGB_TOG,TOG_OLED,  TOG_FR,   KC_NO,   KC_NO, BL_TOGG,                      BL_STEP,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI,   BL_ON,                      BL_BRTG, RGB_M_B, RGB_M_K, RGB_M_P, RGB_M_X,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -377,7 +375,8 @@ void master_to_slave_sync(uint8_t in_buflen, const void* in_data, uint8_t _out_b
 
     globals.is_oled_on = m_data->is_oled_on;
     globals.led_usb_state = m_data->led_usb_state;
-    globals.is_alt_tab_active = m_data->is_alt_tab_active;
+    globals.is_alt_tab_active = m_data->is_alt_tab_active; // timer is useless to sync; only kept global to be consistent
+    globals.is_french_enabled = m_data->is_french_enabled;
     globals.is_esc_caps_swapped = m_data->is_esc_caps_swapped;
 }
 
@@ -403,7 +402,7 @@ void housekeeping_task_user(void) {
 }
 
 void matrix_scan_user(void) {
-    if (globals.is_alt_tab_active && timer_elapsed(alt_tab_timer) > 750) {
+    if (globals.is_alt_tab_active && timer_elapsed(globals.alt_tab_timer) > 750) {
         unregister_code(KC_LALT);
         globals.is_alt_tab_active = false;
     }
@@ -445,7 +444,7 @@ bool oled_task_user(void) {
     return false;
 }
 
-void process_record_user_oled(uint16_t *keycode, keyrecord_t *record) {
+bool process_record_user_oled(uint16_t *keycode, keyrecord_t *record) {
     switch (*keycode) {
     case TOG_OLED:
         if (record->event.pressed) {
@@ -466,15 +465,35 @@ void process_record_user_oled(uint16_t *keycode, keyrecord_t *record) {
         is_barking = record->event.pressed;
         break;
     }
+
+    return true;
 }
 
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+    case TOG_FR:
+        if (record->event.pressed) {
+            globals.is_french_enabled = !globals.is_french_enabled;
+        }
+        break;
+    case _A:
+    case _Z:
+    case _C:
+    case _E:
+    case _U:
+        if (!globals.is_french_enabled) {
+            if (record->event.pressed) {
+                tap_code16(td_to_kc[keycode & 0xff]);
+            }
+            return false;
+        }
+
+        return true;
     default:
         #ifdef OLED_ENABLE
-        process_record_user_oled(&keycode, record);
+        return process_record_user_oled(&keycode, record);
         #endif
         break;
     }

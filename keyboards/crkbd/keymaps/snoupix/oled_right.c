@@ -497,6 +497,8 @@ static void render_luna(void) {
         }
     }
 
+    oled_write(globals.is_french_enabled ? "FR   " : "     ", false);
+
     if (timer_elapsed32(anim_timer) > ANIM_FRAME_DURATION) {
         anim_timer = timer_read32();
         animate_luna(LUNA_POS_X, LUNA_POS_Y);
