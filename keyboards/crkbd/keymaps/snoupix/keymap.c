@@ -482,7 +482,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case _U:
         if (!globals.is_french_enabled) {
             if (record->event.pressed) {
-                tap_code16(td_to_kc[keycode & 0xff]);
+                register_code16(td_to_kc[keycode & 0xff]);
+            } else {
+                unregister_code16(td_to_kc[keycode & 0xff]);
             }
             return false;
         }
