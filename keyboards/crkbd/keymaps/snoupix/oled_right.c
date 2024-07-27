@@ -423,12 +423,12 @@ layer_state_t layer_state_set_user(layer_state_t state) {
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
         rgb_matrix_sethsv_noeeprom(HSV_SPRINGGREEN);
         break;
-    case _GAMING:
+    case _AZER:
         rgb_matrix_reload_from_eeprom();
         break;
-    case _RTS:
+    case _GAMING:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_AZURE);
+        rgb_matrix_sethsv_noeeprom(HSV_MAGENTA);
         break;
     case _GAMING_UPPER:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
@@ -467,10 +467,12 @@ static void render_luna(void) {
 
     oled_set_cursor(0, 9);
 
+    uint8_t curr_layer = get_highest_layer(layer_state);
+
     if (globals.is_alt_tab_active) {
         oled_write("A-TAB", false);
     } else {
-        switch (get_highest_layer(layer_state)) {
+        switch (curr_layer) {
         case _DEFAULT:
             oled_write("BASE ", false);
             break;
@@ -483,21 +485,21 @@ static void render_luna(void) {
         case _EXTRA:
             oled_write("EXTRA", false);
             break;
+        case _AZER:
+            oled_write("AZER ", false);
+            break;
         case _GAMING:
             oled_write("GAME ", false);
             break;
-        case _RTS:
-            oled_write("RTS  ", false);
-            break;
         case _GAMING_UPPER:
-            oled_write("FNs  ", false);
+            oled_write("UPPER", false);
             break;
         default:
             oled_write("UNDEF", false);
         }
     }
 
-    oled_write(globals.is_french_enabled ? "FR   " : "     ", false);
+    oled_write(globals.is_french_enabled && curr_layer >= _AZER ? "FR   " : "     ", false);
 
     if (timer_elapsed32(anim_timer) > ANIM_FRAME_DURATION) {
         anim_timer = timer_read32();

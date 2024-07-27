@@ -48,15 +48,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Special tap dance
 #define _AND TD(TD_AND)
 #define _OR TD(TD_OR)
-#define _EXC TD(TD_EXC)
+#define _EXCL TD(TD_EXCL)
 #define _LEFT TD(TD_MINUS)
 #define _DOWN TD(TD_4)
 #define _UP TD(TD_5)
 #define _RIGHT TD(TD_6)
 
-#define _Q TD(TD_Q)
 #define _A TD(TD_A)
-#define _Z TD(TD_Z)
+#define _Q TD(TD_Q)
+#define _W TD(TD_W)
 #define _E TD(TD_E)
 #define _C TD(TD_C)
 #define _U TD(TD_U)
@@ -87,15 +87,15 @@ enum layers {
     _NUMS,
     _SYMBOLS,
     _EXTRA,
+    _AZER,
     _GAMING,
-    _RTS,
     _GAMING_UPPER,
 };
 
 enum tap_dance {
     TD_AND,
     TD_OR,
-    TD_EXC,
+    TD_EXCL,
 
     TD_MINUS,
     TD_4,
@@ -103,7 +103,7 @@ enum tap_dance {
     TD_6,
 
     TD_A,
-    TD_Z,
+    TD_W,
     TD_E,
     TD_Q,
     TD_C,
@@ -120,8 +120,8 @@ enum custom_keycodes {
 };
 
 uint16_t const td_to_kc[] = {
-    [TD_A] = KC_A,
-    [TD_Z] = KC_Z,
+    [TD_A] = KC_Q,
+    [TD_W] = KC_W,
     [TD_E] = KC_E,
     [TD_C] = KC_C,
     [TD_U] = KC_U,
@@ -153,7 +153,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
 void a_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1:
-        tap_code16(KC_A);
+        tap_code16(KC_Q);
         break;
     case 2:
         tap_code16(FR_AGRV);
@@ -161,10 +161,10 @@ void a_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void z_key_fn(tap_dance_state_t *state, void *user_data) {
+void w_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1:
-        tap_code16(KC_Z);
+        tap_code16(KC_W);
         break;
     default:
         tap_code16(FR_EURO);
@@ -223,10 +223,12 @@ void u_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void esc_key_fn(tap_dance_state_t *state, void *user_data) {
+void esc_caps_key_fn(tap_dance_state_t *state, void *user_data) {
+    bool is_esc = (bool)user_data;
+
     switch (state->count) {
     case 1:
-        tap_code16(globals.is_esc_caps_swapped ? KC_CAPS : KC_ESC);
+        tap_code16((!is_esc && globals.is_esc_caps_swapped) || (is_esc && !globals.is_esc_caps_swapped) ? KC_ESC : KC_CAPS);
         break;
     case 2:
     case 3:
@@ -237,47 +239,41 @@ void esc_key_fn(tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void caps_key_fn(tap_dance_state_t *state, void *user_data) {
-    switch (state->count) {
-    case 1:
-        tap_code16(globals.is_esc_caps_swapped ? KC_ESC : KC_CAPS);
-        break;
-    case 2:
-    case 3:
-        break;
-    default:
-        globals.is_esc_caps_swapped = !globals.is_esc_caps_swapped;
-        break;
-    }
-}
-
 void layer_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 2:
-        layer_move(_GAMING);
+        layer_move(_AZER);
         break;
     }
 }
 
 tap_dance_action_t tap_dance_actions[] = {
     [TD_AND] = ACTION_TAP_DANCE_DOUBLE(KC_UNDS, KC_PIPE),
-    [TD_OR] = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
-    [TD_EXC] = ACTION_TAP_DANCE_DOUBLE(KC_EXLM, KC_QUES),
+    [TD_OR]  = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
+    [TD_EXCL] = ACTION_TAP_DANCE_DOUBLE(KC_EXLM, KC_QUES),
 
     [TD_MINUS] = ACTION_TAP_DANCE_DOUBLE(KC_MINS, KC_LEFT),
-    [TD_4] = ACTION_TAP_DANCE_DOUBLE(KC_4, KC_DOWN),
-    [TD_5] = ACTION_TAP_DANCE_DOUBLE(KC_5, KC_UP),
-    [TD_6] = ACTION_TAP_DANCE_DOUBLE(KC_6, KC_RIGHT),
+    [TD_4]     = ACTION_TAP_DANCE_DOUBLE(KC_4, KC_DOWN),
+    [TD_5]     = ACTION_TAP_DANCE_DOUBLE(KC_5, KC_UP),
+    [TD_6]     = ACTION_TAP_DANCE_DOUBLE(KC_6, KC_RIGHT),
 
     [TD_A] = ACTION_TAP_DANCE_FN(a_key_fn),
-    [TD_Z] = ACTION_TAP_DANCE_FN(z_key_fn),
+    [TD_W] = ACTION_TAP_DANCE_FN(w_key_fn),
     [TD_E] = ACTION_TAP_DANCE_FN(e_key_fn),
     [TD_Q] = ACTION_TAP_DANCE_FN(q_key_fn),
     [TD_C] = ACTION_TAP_DANCE_FN(c_key_fn),
     [TD_U] = ACTION_TAP_DANCE_FN(u_key_fn),
 
-    [TD_ESC] = ACTION_TAP_DANCE_FN(esc_key_fn),
-    [TD_CAPS] = ACTION_TAP_DANCE_FN(caps_key_fn),
+    [TD_ESC] =
+        {
+            .fn        = {((void *)0), esc_caps_key_fn, ((void *)0), ((void *)0)},
+            .user_data = ((void *) true),
+        },
+    [TD_CAPS] =
+        {
+            .fn        = {((void *)0), esc_caps_key_fn, ((void *)0), ((void *)0)},
+            .user_data = ((void *) false),
+        },
 
     [TD_LYR] = ACTION_TAP_DANCE_FN(layer_key_fn),
 };
@@ -287,11 +283,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     // then, maybe change the FR toggle key
     [_DEFAULT] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,      _A,      _Z,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
+       KC_TAB,    KC_A,    KC_Z,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,    KC_M,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-         _EXC,    KC_W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+        _EXCL,    KC_W,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                              _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TT(1)
                                       //`--------------------------'  `--------------------------'
@@ -323,29 +319,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [_EXTRA] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      RGB_TOG,TOG_OLED,  TOG_FR,   KC_NO,   KC_NO, BL_TOGG,                      BL_STEP,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
+      RGB_TOG,TOG_OLED,  TOG_FR,   KC_NO,   KC_NO,   KC_NO,                        KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI,   BL_ON,                      BL_BRTG, RGB_M_B, RGB_M_K, RGB_M_P, RGB_M_X,   KC_NO,
+      RGB_MOD, RGB_HUI, RGB_SAI, RGB_VAI, RGB_SPI,   KC_NO,                        KC_NO, RGB_M_B, RGB_M_K, RGB_M_P, RGB_M_X,   KC_NO,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-     RGB_RMOD, RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD,  BL_OFF,                      RGB_M_R,RGB_M_SW, RGB_M_G,RGB_M_SN, RGB_M_T,   KC_NO,
+     RGB_RMOD, RGB_HUD, RGB_SAD, RGB_VAD, RGB_SPD,   KC_NO,                      RGB_M_R,RGB_M_SW, RGB_M_G,RGB_M_SN, RGB_M_T,   KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             TO(0), KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
   ),
 
-    [_GAMING] = LAYOUT_split_3x6_3(
+    [_AZER] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
+       KC_TAB,      _A,      _W,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LSFT,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+      KC_LCTL,    KC_Z,    KC_X,      _C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                            KC_ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(6)
                                       //`--------------------------'  `--------------------------'
   ),
 
-    [_RTS] = LAYOUT_split_3x6_3(
+    [_GAMING] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       KC_LSFT,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -363,7 +359,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_GRV,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,   KC_NO,
+      KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,  TOG_FR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             TO(0), KC_TRNS,   TO(5),    KC_TRNS, KC_TRNS,   KC_NO
                                       //`--------------------------'  `--------------------------'
@@ -441,6 +437,7 @@ bool oled_task_user(void) {
         render_luna();
         #endif
     }
+
     return false;
 }
 
@@ -479,7 +476,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
         break;
     case _A:
-    case _Z:
+    case _W:
     case _C:
     case _E:
     case _U:

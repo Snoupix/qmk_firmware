@@ -13,13 +13,13 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +350 keyboards/crkbd/keymaps/snoupix/keymap.c
+badd +266 keyboards/crkbd/keymaps/snoupix/keymap.c
 badd +29 keyboards/crkbd/keymaps/snoupix/rules.mk
 badd +1 keyboards/crkbd/keymaps/snoupix/oled_font.c
 badd +9 keyboards/crkbd/keymaps/snoupix/oled_icons.c
 badd +36 keyboards/crkbd/keymaps/snoupix/config.h
 badd +24 display_keymap.rs
-badd +458 keyboards/crkbd/keymaps/snoupix/oled_right.c
+badd +502 keyboards/crkbd/keymaps/snoupix/oled_right.c
 badd +137 keyboards/crkbd/keymaps/snoupix/oled_left.c
 badd +1 .gitignore
 argglobal
@@ -37,12 +37,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 350 - ((44 * winheight(0) + 27) / 55)
+let s:l = 271 - ((27 * winheight(0) + 27) / 55)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 350
-normal! 013|
+keepjumps 271
+normal! 010|
 lcd /home/snoupix/work/qmk
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
@@ -56,7 +56,6 @@ if filereadable(s:sx)
   exe "source " . fnameescape(s:sx)
 endif
 let &g:so = s:so_save | let &g:siso = s:siso_save
-nohlsearch
 doautoall SessionLoadPost
 unlet SessionLoad
 " vim: set ft=vim :
