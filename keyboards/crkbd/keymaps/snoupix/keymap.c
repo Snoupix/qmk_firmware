@@ -56,7 +56,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _A TD(TD_A)
 #define _Q TD(TD_Q)
-#define _W TD(TD_W)
+#define _Z TD(TD_Z)
 #define _E TD(TD_E)
 #define _C TD(TD_C)
 #define _U TD(TD_U)
@@ -87,7 +87,6 @@ enum layers {
     _NUMS,
     _SYMBOLS,
     _EXTRA,
-    _AZER,
     _GAMING,
     _GAMING_UPPER,
 };
@@ -103,7 +102,7 @@ enum tap_dance {
     TD_6,
 
     TD_A,
-    TD_W,
+    TD_Z,
     TD_E,
     TD_Q,
     TD_C,
@@ -117,16 +116,19 @@ enum tap_dance {
 enum custom_keycodes {
     TOG_OLED = SAFE_RANGE,
     TOG_FR,
+    _W,
 };
 
 uint16_t const td_to_kc[] = {
-    [TD_A] = KC_Q,
-    [TD_W] = KC_W,
+    [TD_A] = KC_A,
+    [TD_Z] = KC_Z,
     [TD_E] = KC_E,
     [TD_C] = KC_C,
     [TD_U] = KC_U,
+    [TD_Q] = KC_Q,
 };
 
+// The alt tab macro isn't triggered if FR is disabled and it's alright
 void q_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 1: // One shot press
@@ -134,7 +136,7 @@ void q_key_fn(tap_dance_state_t *state, void *user_data) {
             globals.alt_tab_timer = timer_read();
         }
 
-        tap_code16(globals.is_alt_tab_active ? KC_TAB : KC_Q);
+        tap_code16(globals.is_alt_tab_active ? KC_TAB : KC_A);
         break;
     case 2: // Double tap dance triggered
         if (globals.is_alt_tab_active) {
@@ -242,14 +244,14 @@ void esc_caps_key_fn(tap_dance_state_t *state, void *user_data) {
 void layer_key_fn(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
     case 2:
-        layer_move(_AZER);
+        layer_move(_GAMING);
         break;
     }
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [TD_AND] = ACTION_TAP_DANCE_DOUBLE(KC_UNDS, KC_PIPE),
-    [TD_OR]  = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
+    [TD_AND]  = ACTION_TAP_DANCE_DOUBLE(KC_UNDS, KC_PIPE),
+    [TD_OR]   = ACTION_TAP_DANCE_DOUBLE(KC_TILD, KC_AMPR),
     [TD_EXCL] = ACTION_TAP_DANCE_DOUBLE(KC_EXLM, KC_QUES),
 
     [TD_MINUS] = ACTION_TAP_DANCE_DOUBLE(KC_MINS, KC_LEFT),
@@ -258,7 +260,7 @@ tap_dance_action_t tap_dance_actions[] = {
     [TD_6]     = ACTION_TAP_DANCE_DOUBLE(KC_6, KC_RIGHT),
 
     [TD_A] = ACTION_TAP_DANCE_FN(a_key_fn),
-    [TD_W] = ACTION_TAP_DANCE_FN(w_key_fn),
+    [TD_Z] = ACTION_TAP_DANCE_FN(w_key_fn),
     [TD_E] = ACTION_TAP_DANCE_FN(e_key_fn),
     [TD_Q] = ACTION_TAP_DANCE_FN(q_key_fn),
     [TD_C] = ACTION_TAP_DANCE_FN(c_key_fn),
@@ -279,15 +281,13 @@ tap_dance_action_t tap_dance_actions[] = {
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    // TODO: Move the upper keys (tap dances) GAMING layer to be used as an AZERTY layer without TD for gaming and with TD for normal FR text
-    // then, maybe change the FR toggle key
     [_DEFAULT] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,    KC_A,    KC_Z,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
+       KC_TAB,      _A,      _Z,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
          _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,    KC_M,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-        _EXCL,    KC_W,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+        _EXCL,      _W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                              _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TT(1)
                                       //`--------------------------'  `--------------------------'
@@ -329,27 +329,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                       //`--------------------------'  `--------------------------'
   ),
 
-    [_AZER] = LAYOUT_split_3x6_3(
-  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-       KC_TAB,      _A,      _W,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LSFT,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
-  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_LCTL,    KC_Z,    KC_X,      _C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
-  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                           KC_ESC, KC_LALT,  KC_SPC,    KC_BSPC,  KC_ENT,   MO(6)
-                                      //`--------------------------'  `--------------------------'
-  ),
-
     [_GAMING] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      KC_LSFT,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   _CAPS,
+      KC_LSFT,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,    KC_P, KC_CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LCTL,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                           _H,      _J,      _K,      _L, KC_SCLN,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
        KC_TAB,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                             _ESC,   MO(6),  KC_SPC,    KC_BSPC,  KC_ENT, KC_LALT
+                                           KC_ESC,   MO(5),  KC_SPC,    KC_BSPC,  KC_ENT, KC_LALT
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -359,9 +347,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_TRNS,   KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                        KC_F6,   KC_F7,   KC_F8,   KC_F9,  KC_F10,  KC_GRV,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,  TOG_FR,
+      KC_TRNS,  KC_F11,  KC_F12,  KC_F13,  KC_F14,  KC_F15,                       KC_F16,  KC_F17,  KC_F18,  KC_F19,  KC_F20,   KC_NO,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            TO(0), KC_TRNS,   TO(5),    KC_TRNS, KC_TRNS,   KC_NO
+                                            KC_NO,   KC_NO, KC_TRNS,    KC_TRNS, KC_TRNS,   TO(0)
                                       //`--------------------------'  `--------------------------'
   ),
 };
@@ -475,17 +463,30 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             globals.is_french_enabled = !globals.is_french_enabled;
         }
         break;
-    case _A:
     case _W:
+        uint16_t kc = globals.is_french_enabled ? KC_Z : KC_W;
+
+        if (record->event.pressed) {
+            register_code16(kc);
+        } else {
+            unregister_code16(kc);
+        }
+        break;
+    case _A:
+    case _Z:
     case _C:
     case _E:
     case _U:
+    case _Q:
         if (!globals.is_french_enabled) {
+            uint16_t kc = td_to_kc[keycode & 0xff];
+
             if (record->event.pressed) {
-                register_code16(td_to_kc[keycode & 0xff]);
+                register_code16(kc);
             } else {
-                unregister_code16(td_to_kc[keycode & 0xff]);
+                unregister_code16(kc);
             }
+
             return false;
         }
 

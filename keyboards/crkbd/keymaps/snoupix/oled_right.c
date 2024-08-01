@@ -421,18 +421,11 @@ layer_state_t layer_state_set_user(layer_state_t state) {
         break;
     case _EXTRA:
         rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_SPRINGGREEN);
-        break;
-    case _AZER:
-        rgb_matrix_reload_from_eeprom();
+        rgb_matrix_sethsv_noeeprom(HSV_CHARTREUSE);
         break;
     case _GAMING:
-        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_MAGENTA);
-        break;
     case _GAMING_UPPER:
-        rgb_matrix_mode_noeeprom(RGB_MATRIX_ALPHAS_MODS);
-        rgb_matrix_sethsv_noeeprom(HSV_CHARTREUSE);
+        rgb_matrix_reload_from_eeprom();
         break;
     }
     return state;
@@ -474,7 +467,7 @@ static void render_luna(void) {
     } else {
         switch (curr_layer) {
         case _DEFAULT:
-            oled_write("BASE ", false);
+            oled_write(globals.is_french_enabled ? "AZER " : "BASE ", false);
             break;
         case _NUMS:
             oled_write("NBRS ", false);
@@ -484,9 +477,6 @@ static void render_luna(void) {
             break;
         case _EXTRA:
             oled_write("EXTRA", false);
-            break;
-        case _AZER:
-            oled_write("AZER ", false);
             break;
         case _GAMING:
             oled_write("GAME ", false);
@@ -499,7 +489,7 @@ static void render_luna(void) {
         }
     }
 
-    oled_write(globals.is_french_enabled && curr_layer >= _AZER ? "FR   " : "     ", false);
+    // oled_write(globals.is_french_enabled && curr_layer >= _AZER ? "FR   " : "     ", false);
 
     if (timer_elapsed32(anim_timer) > ANIM_FRAME_DURATION) {
         anim_timer = timer_read32();
