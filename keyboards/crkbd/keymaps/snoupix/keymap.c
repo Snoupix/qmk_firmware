@@ -117,6 +117,8 @@ enum custom_keycodes {
     TOG_OLED = SAFE_RANGE,
     TOG_FR,
     _W,
+    _M,
+    _SCLN,
 };
 
 uint16_t const td_to_kc[] = {
@@ -285,9 +287,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
        KC_TAB,      _A,      _Z,      _E,    KC_R,    KC_T,                         KC_Y,      _U,    KC_I,    KC_O,    KC_P,   _CAPS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-         _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,    KC_M,    _AND,
+         _ESC,      _Q,      _S,      _D,      _F,      _G,                           _H,      _J,      _K,      _L,      _M,    _AND,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-        _EXCL,      _W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N, KC_SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
+        _EXCL,      _W,    KC_X,      _C,    KC_V,    KC_B,                         KC_N,   _SCLN, KC_COMM,  KC_DOT, KC_SLSH,     _OR,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                              _ESC,    _LYR,  KC_SPC,    KC_BSPC,  KC_ENT,   TT(1)
                                       //`--------------------------'  `--------------------------'
@@ -463,7 +465,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             globals.is_french_enabled = !globals.is_french_enabled;
         }
         break;
-    case _W:
+    case _W: {
         uint16_t kc = globals.is_french_enabled ? KC_Z : KC_W;
 
         if (record->event.pressed) {
@@ -472,6 +474,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             unregister_code16(kc);
         }
         break;
+    }
+    case _M:
+    case _SCLN: {
+        uint16_t kc = (keycode == _M && globals.is_french_enabled) || (keycode == _SCLN && !globals.is_french_enabled) ? KC_SCLN : KC_M;
+
+        if (record->event.pressed) {
+            register_code16(kc);
+        } else {
+            unregister_code16(kc);
+        }
+        break;
+    }
     case _A:
     case _Z:
     case _C:
